@@ -212,58 +212,37 @@ div.input {
 <h2 class="anchored" data-anchor-id="wrangling">Wrangling</h2>
 <section id="epl-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="epl-dataset">EPL dataset</h3>
-<p>The first task was to extract data relating to Manchester city from the EPL dataset as well as the Tweets dataset. I then separated the data for home and away games in the EPL, since teams typically perform better at home than away, and further separated it for games played before Pep Guardiola became coach (1992-2016) and for those played after he became coach (2016-2022). This was achieved using masks as shown in the code below.</p>
-<div class="cell" data-execution_count="41">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#read in csv</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>matches <span class="op">=</span> pd.read_csv(<span class="st">'eplmatches.csv'</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#standardise column names - custom written function</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>standardise_column_names(matches)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#isolate records for Manchester city - home and away</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>home_mask <span class="op">=</span> matches[<span class="st">"home"</span>].<span class="bu">str</span>.contains(<span class="st">"Manchester City"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>away_mask <span class="op">=</span> matches[<span class="st">"away"</span>].<span class="bu">str</span>.contains(<span class="st">'Manchester City'</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#create dfs for city - home and away and seperate for pep and before pep</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Hcity_df <span class="op">=</span> matches[home_mask]</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>before_pep_home <span class="op">=</span> Hcity_df[Hcity_df[<span class="st">'season_end_year'</span>] <span class="op">&lt;</span> <span class="dv">2017</span>]</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>pep_home <span class="op">=</span> Hcity_df[Hcity_df[<span class="st">'season_end_year'</span>] <span class="op">&gt;=</span> <span class="dv">2017</span>]</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>Acity_df <span class="op">=</span> matches[away_mask]</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>before_pep_away <span class="op">=</span> Acity_df[Acity_df[<span class="st">'season_end_year'</span>] <span class="op">&lt;</span> <span class="dv">2017</span>]</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>pep_away <span class="op">=</span> Acity_df[Acity_df[<span class="st">'season_end_year'</span>] <span class="op">&gt;=</span> <span class="dv">2017</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The first task was to extract data relating to Manchester city from the EPL dataset as well as the Tweets dataset. I then separated the data for home and away games in the EPL, since teams typically perform better at home than away, and further separated it for games played before Pep Guardiola became coach (1992-2016) and for those played after he became coach (2016-2022). This was achieved using masks. I also had a custom function to standardise column names.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#standardise column names</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> standardise_column_names(df, remove_punct<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    translator <span class="op">=</span> <span class="bu">str</span>.maketrans(string.punctuation, <span class="st">' '</span><span class="op">*</span><span class="bu">len</span>(string.punctuation))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> c <span class="kw">in</span> df.columns:</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        c_mod <span class="op">=</span> c.lower()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> remove_punct:            </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>            c_mod <span class="op">=</span> c_mod.translate(translator)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        c_mod <span class="op">=</span> <span class="st">'_'</span>.join(c_mod.split(<span class="st">' '</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> c_mod[<span class="op">-</span><span class="dv">1</span>] <span class="op">==</span> <span class="st">'_'</span>:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            c_mod <span class="op">=</span> c_mod[:<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        c_mod <span class="op">=</span> re.sub(<span class="vs">r'\_+'</span>, <span class="st">'_'</span>, c_mod)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        df.rename({c: c_mod}, inplace<span class="op">=</span><span class="va">True</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="tweet-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="tweet-dataset">Tweet dataset</h3>
 <p>The first task was to extract data relating to Manchester City from the Tweets dataset as it contained tweets relating to all Premier League clubs. The dataset was organised by files, so a mask to the ManchesterCity file column returned the required records, nearly 140 000 tweets that were filtered for the hashtags : #ManchesterCity, #Mancity or #MCFC from July to October in 2020 which captures the end of the pre-season and the first half of the season ending in 2021.The tweet data naturally contained emojis which are read as UTF codes in Python. I created a function to get rid of them so as to accurately perform natural language processing on the dataset. The function is shown below.</p>
-<div class="cell" data-execution_count="42">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#read in the epl tweets files</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>tweets1 <span class="op">=</span> pd.read_csv(<span class="st">'archive/df1.csv'</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>tweets2 <span class="op">=</span> pd.read_csv(<span class="st">'archive/df2.csv'</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#isolate tweets for manchester city</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>tweet1_mask <span class="op">=</span> tweets1[<span class="st">"file_name"</span>].<span class="bu">str</span>.contains(<span class="st">"ManchesterCity"</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>tweet2_mask <span class="op">=</span> tweets2[<span class="st">"file_name"</span>].<span class="bu">str</span>.contains(<span class="st">"ManchesterCity"</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#create data frames with tweets</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>city1 <span class="op">=</span> tweets1[tweet1_mask]</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>city2 <span class="op">=</span> tweets2[tweet2_mask]</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#combine tweets into one df</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>tweet_frames <span class="op">=</span> [city1, city2]</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>city_tweets <span class="op">=</span> pd.concat(tweet_frames)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <div class="cell" data-execution_count="48">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># function to remove emojis</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> remove_emojis(text):</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    emoji_pattern <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">"["</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F600</span><span class="st">-</span><span class="ch">\U0001F64F</span><span class="st">"</span>  <span class="co"># emoticons</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F300</span><span class="st">-</span><span class="ch">\U0001F5FF</span><span class="st">"</span>  <span class="co"># symbols &amp; pictographs</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F680</span><span class="st">-</span><span class="ch">\U0001F6FF</span><span class="st">"</span>  <span class="co"># transport &amp; map symbols</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F1E0</span><span class="st">-</span><span class="ch">\U0001F1FF</span><span class="st">"</span>  <span class="co"># flags (iOS)</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"]+"</span>, flags<span class="op">=</span>re.UNICODE)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> emoji_pattern.sub(<span class="vs">r''</span>, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># function to remove emojis</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> remove_emojis(text):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    emoji_pattern <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">"["</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F600</span><span class="st">-</span><span class="ch">\U0001F64F</span><span class="st">"</span>  <span class="co"># emoticons</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F300</span><span class="st">-</span><span class="ch">\U0001F5FF</span><span class="st">"</span>  <span class="co"># symbols &amp; pictographs</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F680</span><span class="st">-</span><span class="ch">\U0001F6FF</span><span class="st">"</span>  <span class="co"># transport &amp; map symbols</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">u"</span><span class="ch">\U0001F1E0</span><span class="st">-</span><span class="ch">\U0001F1FF</span><span class="st">"</span>  <span class="co"># flags (iOS)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"]+"</span>, flags<span class="op">=</span>re.UNICODE)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> emoji_pattern.sub(<span class="vs">r''</span>, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -1324,30 +1303,30 @@ if (force === true) {
 <p>To best learn how much Manchester City’s goal margins have improved under Pep Guardiola, I trained a simple machine learning model to predict the goals expected to be scored and conceded by Manchester City given a specific opponent. I further specified that the model should predict differently for home and away games as we have seen that there are significant differences in performance for games played at home and those played away.</p>
 <p>To get an idea of the model’s output, I selected 5 teams (Liverpool, Manchester United, Arsenal, Chelsea, Tottenham Hotspur),that have arguably been top teams historically in the Premier League and that would have faced Manchester City occasionally both before and after Pep Guardiola became manager. I also selected West Ham, Newcastle United, Burnley, Aston Villa and Everton to add balance. The sample model and results are displayed below.</p>
 <div class="cell" data-scrolled="true" data-execution_count="50">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#home games all</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create df with aggregated goals scored and conceded by each opponent</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>opponent_goals <span class="op">=</span> Hcity_df.groupby(<span class="st">'away'</span>).agg({<span class="st">'homegoals'</span>: <span class="st">'sum'</span>, <span class="st">'awaygoals'</span>: <span class="st">'sum'</span>, <span class="st">'away'</span>: <span class="st">'count'</span>})</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>opponent_goals.rename(columns<span class="op">=</span>{<span class="st">'away'</span>: <span class="st">'games_played'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#calculate average goals scored and conceded per game by each opponent</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>opponent_goals[<span class="st">'avg_goals_scored'</span>] <span class="op">=</span> opponent_goals[<span class="st">'homegoals'</span>] <span class="op">/</span> opponent_goals[<span class="st">'games_played'</span>]</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>opponent_goals[<span class="st">'avg_goals_conceded'</span>] <span class="op">=</span> opponent_goals[<span class="st">'awaygoals'</span>] <span class="op">/</span> opponent_goals[<span class="st">'games_played'</span>]</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Train linear regression model to predict expected goals scored and conceded by Manchester City against a given opponent</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> opponent_goals[[<span class="st">'avg_goals_scored'</span>, <span class="st">'avg_goals_conceded'</span>]]</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>y_scored <span class="op">=</span> opponent_goals[<span class="st">'avg_goals_scored'</span>]</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>y_conceded <span class="op">=</span> opponent_goals[<span class="st">'avg_goals_conceded'</span>]</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>model_scored <span class="op">=</span> LinearRegression().fit(X, y_scored)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>model_conceded <span class="op">=</span> LinearRegression().fit(X, y_conceded)</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the trained model to make predictions for a given opponent</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>opponent <span class="op">=</span> <span class="st">'Arsenal'</span>  <span class="co"># replace with the desired opponent</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>opponent_stats <span class="op">=</span> opponent_goals.loc[opponent, [<span class="st">'avg_goals_scored'</span>, <span class="st">'avg_goals_conceded'</span>]].values.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>expected_scored <span class="op">=</span> model_scored.predict(opponent_stats)[<span class="dv">0</span>]</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>expected_conceded <span class="op">=</span> model_conceded.predict(opponent_stats)[<span class="dv">0</span>]</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#print(f'Expected goals scored by Man City against {opponent}: {expected_scored:.2f}')</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#print(f'Expected goals conceded by Man City against {opponent}: {expected_conceded:.2f}')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#home games all</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create df with aggregated goals scored and conceded by each opponent</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>opponent_goals <span class="op">=</span> Hcity_df.groupby(<span class="st">'away'</span>).agg({<span class="st">'homegoals'</span>: <span class="st">'sum'</span>, <span class="st">'awaygoals'</span>: <span class="st">'sum'</span>, <span class="st">'away'</span>: <span class="st">'count'</span>})</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>opponent_goals.rename(columns<span class="op">=</span>{<span class="st">'away'</span>: <span class="st">'games_played'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#calculate average goals scored and conceded per game by each opponent</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>opponent_goals[<span class="st">'avg_goals_scored'</span>] <span class="op">=</span> opponent_goals[<span class="st">'homegoals'</span>] <span class="op">/</span> opponent_goals[<span class="st">'games_played'</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>opponent_goals[<span class="st">'avg_goals_conceded'</span>] <span class="op">=</span> opponent_goals[<span class="st">'awaygoals'</span>] <span class="op">/</span> opponent_goals[<span class="st">'games_played'</span>]</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Train linear regression model to predict expected goals scored and conceded by Manchester City against a given opponent</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> opponent_goals[[<span class="st">'avg_goals_scored'</span>, <span class="st">'avg_goals_conceded'</span>]]</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>y_scored <span class="op">=</span> opponent_goals[<span class="st">'avg_goals_scored'</span>]</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>y_conceded <span class="op">=</span> opponent_goals[<span class="st">'avg_goals_conceded'</span>]</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>model_scored <span class="op">=</span> LinearRegression().fit(X, y_scored)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>model_conceded <span class="op">=</span> LinearRegression().fit(X, y_conceded)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the trained model to make predictions for a given opponent</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>opponent <span class="op">=</span> <span class="st">'Arsenal'</span>  <span class="co"># replace with the desired opponent</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>opponent_stats <span class="op">=</span> opponent_goals.loc[opponent, [<span class="st">'avg_goals_scored'</span>, <span class="st">'avg_goals_conceded'</span>]].values.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>expected_scored <span class="op">=</span> model_scored.predict(opponent_stats)[<span class="dv">0</span>]</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>expected_conceded <span class="op">=</span> model_conceded.predict(opponent_stats)[<span class="dv">0</span>]</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#print(f'Expected goals scored by Man City against {opponent}: {expected_scored:.2f}')</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#print(f'Expected goals conceded by Man City against {opponent}: {expected_conceded:.2f}')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="expected-goals-before-pep" class="level3">
 <h3 class="anchored" data-anchor-id="expected-goals-before-pep">Expected goals before Pep</h3>
