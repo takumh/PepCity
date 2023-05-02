@@ -1302,32 +1302,6 @@ if (force === true) {
 <p>There is obviously a degree of residual variance between goals and xG over certain time periods given that goals have a unit scale of 1, whereas xG values fall on a scale with decimals. Perhaps chance is accounted for by our decision to round up or down on a generated statistic, a decision that here has been left to the discretion of the reader.</p>
 <p>To best learn how much Manchester City’s goal margins have improved under Pep Guardiola, I trained a simple machine learning model to predict the goals expected to be scored and conceded by Manchester City given a specific opponent. I further specified that the model should predict differently for home and away games as we have seen that there are significant differences in performance for games played at home and those played away.</p>
 <p>To get an idea of the model’s output, I selected 5 teams (Liverpool, Manchester United, Arsenal, Chelsea, Tottenham Hotspur),that have arguably been top teams historically in the Premier League and that would have faced Manchester City occasionally both before and after Pep Guardiola became manager. I also selected West Ham, Newcastle United, Burnley, Aston Villa and Everton to add balance. The sample model and results are displayed below.</p>
-<div class="cell" data-scrolled="true" data-execution_count="50">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#home games all</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create df with aggregated goals scored and conceded by each opponent</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>opponent_goals <span class="op">=</span> Hcity_df.groupby(<span class="st">'away'</span>).agg({<span class="st">'homegoals'</span>: <span class="st">'sum'</span>, <span class="st">'awaygoals'</span>: <span class="st">'sum'</span>, <span class="st">'away'</span>: <span class="st">'count'</span>})</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>opponent_goals.rename(columns<span class="op">=</span>{<span class="st">'away'</span>: <span class="st">'games_played'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#calculate average goals scored and conceded per game by each opponent</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>opponent_goals[<span class="st">'avg_goals_scored'</span>] <span class="op">=</span> opponent_goals[<span class="st">'homegoals'</span>] <span class="op">/</span> opponent_goals[<span class="st">'games_played'</span>]</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>opponent_goals[<span class="st">'avg_goals_conceded'</span>] <span class="op">=</span> opponent_goals[<span class="st">'awaygoals'</span>] <span class="op">/</span> opponent_goals[<span class="st">'games_played'</span>]</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Train linear regression model to predict expected goals scored and conceded by Manchester City against a given opponent</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> opponent_goals[[<span class="st">'avg_goals_scored'</span>, <span class="st">'avg_goals_conceded'</span>]]</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>y_scored <span class="op">=</span> opponent_goals[<span class="st">'avg_goals_scored'</span>]</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>y_conceded <span class="op">=</span> opponent_goals[<span class="st">'avg_goals_conceded'</span>]</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>model_scored <span class="op">=</span> LinearRegression().fit(X, y_scored)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>model_conceded <span class="op">=</span> LinearRegression().fit(X, y_conceded)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the trained model to make predictions for a given opponent</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>opponent <span class="op">=</span> <span class="st">'Arsenal'</span>  <span class="co"># replace with the desired opponent</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>opponent_stats <span class="op">=</span> opponent_goals.loc[opponent, [<span class="st">'avg_goals_scored'</span>, <span class="st">'avg_goals_conceded'</span>]].values.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>expected_scored <span class="op">=</span> model_scored.predict(opponent_stats)[<span class="dv">0</span>]</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>expected_conceded <span class="op">=</span> model_conceded.predict(opponent_stats)[<span class="dv">0</span>]</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#print(f'Expected goals scored by Man City against {opponent}: {expected_scored:.2f}')</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#print(f'Expected goals conceded by Man City against {opponent}: {expected_conceded:.2f}')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <section id="expected-goals-before-pep" class="level3">
 <h3 class="anchored" data-anchor-id="expected-goals-before-pep">Expected goals before Pep</h3>
 <div class="cell" data-scrolled="true" data-execution_count="20">
