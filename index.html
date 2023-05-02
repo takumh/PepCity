@@ -199,7 +199,7 @@ div.input {
 <h1>Introduction</h1>
 <section id="background-and-motivation" class="level2">
 <h2 class="anchored" data-anchor-id="background-and-motivation">Background and Motivation</h2>
-<p>Manchester City Football club is considered one of the best football teams in the world. They have won the English premier league four times in the last five seasons and are on track to win their fifth title. They have also won multiple domestic cups in England and the UK. Manchester city havent always been a successfull club however, and some fans argue that their recent success has only come as a result of ownership change, massive spending and their latest manager, Pep Guardiola. My goal was to investigate Manchester City’s history in the EPL and compare their recent performances under Pep to previous managers. Manchester City’s rallying song ‘Blue Moon’ refers to the fact that the team would win away games “once in a blue moon”. I was interested in quantifying how much this has changed in recent seasons.</p>
+<p>Manchester City Football club is considered one of the best football teams in the world. They have won the English premier league four times in the last five seasons and are on track to win their fifth title. They have also won multiple domestic cups in England and the UK. Manchester City haven’t always been a successful club however, and some fans argue that their recent success has only come as a result of ownership change, massive spending and their latest manager, Pep Guardiola. My goal was to investigate Manchester City’s history in the EPL and compare their recent performances under Pep to previous managers. Manchester City’s rallying song ‘Blue Moon’ refers to the fact that the team would win away games “once in a blue moon”. I was interested in quantifying how much this has changed in recent seasons.</p>
 </section>
 </section>
 <section id="about-the-data" class="level1">
@@ -236,7 +236,7 @@ div.input {
 </section>
 <section id="tweet-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="tweet-dataset">Tweet dataset</h3>
-<p>The first task was to extract data relating to Manchester city from the Tweets dataset as it contained tweets relating to all Premier League clubs. The dataset was organised by files, so a mask to the ManchesterCity file column returned the required records, nearly 140 000 tweets that were filtered for the hashtags : #ManchesterCity, #Mancity or #MCFC from July to October in 2020 which captures the end of the pre-season and the first half of the season ending in 2021.The tweet data naturally contained emojis which are read as UTF codes in Python. I created a function to get rid of them so as to accurately perform natural language processing on the dataset. The function is shown below.</p>
+<p>The first task was to extract data relating to Manchester City from the Tweets dataset as it contained tweets relating to all Premier League clubs. The dataset was organised by files, so a mask to the ManchesterCity file column returned the required records, nearly 140 000 tweets that were filtered for the hashtags : #ManchesterCity, #Mancity or #MCFC from July to October in 2020 which captures the end of the pre-season and the first half of the season ending in 2021.The tweet data naturally contained emojis which are read as UTF codes in Python. I created a function to get rid of them so as to accurately perform natural language processing on the dataset. The function is shown below.</p>
 <div class="cell" data-execution_count="42">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#read in the epl tweets files</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>tweets1 <span class="op">=</span> pd.read_csv(<span class="st">'archive/df1.csv'</span>)</span>
@@ -616,7 +616,7 @@ if (force === true) {
 </script>
 </div>
 </div>
-<p>From the plots, we can see that Manchester city have scored more goals against their opponents for both home and away games. Generally, it seems that Manchester city score more goals at home than away and concede less at home.</p>
+<p>From the plots, we can see that Manchester City have scored more goals against their opponents for both home and away games. Generally, it seems that Manchester City score more goals at home than away and concede less at home, confirming that the team is indeed more likely to win at home than away.</p>
 </section>
 </section>
 <section id="how-good-is-pep-guardiola" class="level2">
@@ -641,8 +641,8 @@ if (force === true) {
 <p><img src="index_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<p>From the plots we can see that before Pep Guardiola, Manchester City won nearly 50% of their home games, 30% of their away games and 40% overall. They drew just over 20% of their home games, about 25% of their away games and overall. At home, Manchester City lost about 25% of their home games before Pep Guardiola became manager, over 25% of their away games and near;y 35% of all their games.</p>
-<p>Under Pep Guardiola, these stats improved significantly. Manchester City have won nearly 80% of all their home games, 70% of their away games and over 70% overall. They have only drawn about 10% at home and away and overall and they have lost less than 10% of their home games, about 15% of their away games and about 10% overall. This shows a remarkable improvement in both home and away games under Pep Guardiola.</p>
+<p>From the plots we can see that before Pep Guardiola, Manchester City had won nearly 50% of their home games, 30% of their away games and 40% overall. They had drawn just over 20% of their home games, about 25% of their away games and overall. At home, Manchester City had lost about 25% of their home games before Pep Guardiola became manager, over 25% of their away games and nearly 35% of all their games.</p>
+<p>Under Pep Guardiola, these stats improved significantly. Manchester City have won nearly 80% of all their home games, 70% of their away games and over 70% overall. They have only drawn about 10% at home and away and overall and they have lost less than 10% of their home games, about 15% of their away games and about 10% overall. This shows a remarkable improvement in both home and away games under Pep Guardiola. It seems that now, Manchester City wins regurlarly away, and not once in a “Blue Moon”.</p>
 </section>
 </section>
 <section id="goals-scored-and-conceded-before-pep-guardiola" class="level3">
@@ -1313,7 +1313,7 @@ if (force === true) {
 </script>
 </div>
 </div>
-<p>The results are not easily comparable since premier league teams are not constant and some teams that have historically frequently featured in the Premier league have not been promoted under Pep Guardiola’s charge. However we can still see that under Pep, the margins between goals scored and conceded have positively widened.</p>
+<p>The results are not easily comparable since Premier League teams are not constant and some teams that have historically frequently featured in the Premier League have not been promoted under Pep Guardiola’s charge. However, we can still see that under Pep, the margins between goals scored and conceded have positively widened.</p>
 </section>
 </section>
 <section id="xg-via-machine-learning" class="level2">
